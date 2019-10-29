@@ -1,7 +1,7 @@
 version:  '3.7'
 services:
   db:
-    image: postgres:12
+    image: postgres:11
     container_name: postgres
     ports:
       - 5432:5432
@@ -9,3 +9,11 @@ services:
       - ./docker/data/:/var/lib/postgresql/data:z
     environment:
       POSTGRES_PASSWORD: root
+      POSTGRES_DB : mydb
+      POSTGRES_USER : postgres
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8081:8080
