@@ -17,6 +17,7 @@ type login struct {
 
 var identityKey = "id"
 
+// InitLogin is creating jwt Token for users
 func InitLogin(r *gin.Engine, port string) {
 
 	authMiddleware, _ := jwt.New(&jwt.GinJWTMiddleware{

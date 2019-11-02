@@ -14,6 +14,7 @@ func main() {
 	r := gin.Default()
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
+	port := "8080"
 	if port == "" {
 		port = "8080"
 	}
