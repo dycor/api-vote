@@ -2,17 +2,16 @@ package postgres
 
 import (
 	"fmt"
+
 	"github.com/dycor/api-vote/db"
 	"github.com/dycor/api-vote/model"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
 
-
 type PostgresDB struct {
 	db *gorm.DB
 }
-
 
 // New is creating a moke to persist data.
 func New() db.Persist {
@@ -47,6 +46,16 @@ func (sql PostgresDB) UpdateUser(uuid string, u model.User) error {
 
 // GetUser is getting a user from his/here uuid.
 func (sql PostgresDB) GetUser(uuid string) (*model.User, error) {
+	return nil, nil
+}
+
+// GetUser is getting a user from his/here email.
+func (sql PostgresDB) GetUserByEmail(email string) (*model.User, error) {
+	fmt.Println("Test email")
+	var u model.User
+	row := sql.db.Table("user").Where("email", email).Select("first_name").Row()
+	row.Scan(&u.FirstName)
+	fmt.Println(u)
 	return nil, nil
 }
 

@@ -12,6 +12,7 @@ type Persist interface {
 	DeleteUser(uuid string) error
 	UpdateUser(uuid string, u model.User) error
 	GetUser(uuid string) (*model.User, error)
+	GetUserByEmail(email string) (*model.User, error)
 	GetAllUser() (map[string]model.User, error)
 }
 

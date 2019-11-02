@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -20,7 +21,9 @@ var identityKey = "id"
 
 // InitLogin is creating jwt Token for users
 func InitLogin(r *gin.Engine, port string, db db.Persist) {
-
+	su := ServiceUser{
+		db: db,
+	}
 	authMiddleware, _ := jwt.New(&jwt.GinJWTMiddleware{
 		Realm:       "test zone",
 		Key:         []byte("secret key"),
@@ -43,6 +46,9 @@ func InitLogin(r *gin.Engine, port string, db db.Persist) {
 		},
 		Authenticator: func(c *gin.Context) (interface{}, error) {
 			var loginVals login
+			u, err := su.db.GetUserByEmail(c.Param("email"))
+			fmt.Println(u)
+			fmt.Println(err)
 			if err := c.ShouldBind(&loginVals); err != nil {
 				return "", jwt.ErrMissingLoginValues
 			}
