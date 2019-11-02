@@ -18,7 +18,7 @@ func main() {
 	if port == "" {
 		port = "8080"
 	}
-	r.Run(":" + port)
 	handler.InitUser(r, postgres.New())
 	handler.InitLogin(r, port)
+	r.Run(":" + port)
 }
