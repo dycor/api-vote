@@ -3,6 +3,7 @@ module github.com/dycor/api-vote
 go 1.13
 
 require (
+	github.com/appleboy/gin-jwt/v2 v2.6.2
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/gin-gonic/gin v1.4.0
 	github.com/go-playground/locales v0.13.0 // indirect

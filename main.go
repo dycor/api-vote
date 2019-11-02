@@ -8,8 +8,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+var port string
+
 func main() {
 	r := gin.Default()
+	r.Use(gin.Logger())
+	r.Use(gin.Recovery())
+	if port == "" {
+		port = "8080"
+	}
+	r.Run(":" + port)
 	handler.InitUser(r, postgres.New())
-	r.Run(":8080")
+	handler.InitLogin(r, port)
 }

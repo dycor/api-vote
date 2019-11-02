@@ -116,4 +116,5 @@ func (su ServiceUser) PostUserHandler(ctx *gin.Context) {
 	u.UUID = uuid.NewV4().String()
 	su.db.AddUser(&u)
 	ctx.JSON(http.StatusOK, u)
+
 }
