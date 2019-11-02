@@ -6,6 +6,7 @@ import (
 	"time"
 
 	jwt "github.com/appleboy/gin-jwt/v2"
+	"github.com/dycor/api-vote/db"
 	"github.com/dycor/api-vote/model"
 	"github.com/gin-gonic/gin"
 )
@@ -18,7 +19,7 @@ type login struct {
 var identityKey = "id"
 
 // InitLogin is creating jwt Token for users
-func InitLogin(r *gin.Engine, port string) {
+func InitLogin(r *gin.Engine, port string, db db.Persist) {
 
 	authMiddleware, _ := jwt.New(&jwt.GinJWTMiddleware{
 		Realm:       "test zone",
@@ -48,18 +49,18 @@ func InitLogin(r *gin.Engine, port string) {
 			userID := loginVals.Email
 			password := loginVals.Password
 
-			if (userID == "admin" && password == "admin") || (userID == "test" && password == "test") {
+			if userID == "test@gmail.com" && password == "test" {
 				return &model.User{
 					Email:     userID,
-					LastName:  "Bo-Yi",
-					FirstName: "Wu",
+					LastName:  "Test",
+					FirstName: "Test",
 				}, nil
 			}
 
 			return nil, jwt.ErrFailedAuthentication
 		},
 		Authorizator: func(data interface{}, c *gin.Context) bool {
-			if v, ok := data.(*model.User); ok && v.Email == "admin" {
+			if v, ok := data.(*model.User); ok && v.Email == "test@gmail.com" {
 				return true
 			}
 
