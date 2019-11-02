@@ -103,7 +103,7 @@ func InitLogin(r *gin.Engine, port string) {
 	auth.GET("/refresh_token", authMiddleware.RefreshHandler)
 	auth.Use(authMiddleware.MiddlewareFunc())
 	{
-		auth.GET("/hello", helloHandler)
+		auth.GET("/hello", HelloWorld)
 	}
 
 	if err := http.ListenAndServe(":"+port, r); err != nil {
@@ -111,7 +111,7 @@ func InitLogin(r *gin.Engine, port string) {
 	}
 }
 
-func helloHandler(c *gin.Context) {
+func HelloWorld(c *gin.Context) {
 	claims := jwt.ExtractClaims(c)
 	user, _ := c.Get(identityKey)
 	c.JSON(200, gin.H{
