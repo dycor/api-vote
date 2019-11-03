@@ -46,12 +46,13 @@ func InitLogin(r *gin.Engine, port string, db db.Persist) {
 		},
 		Authenticator: func(c *gin.Context) (interface{}, error) {
 			var loginVals login
-			u, err := su.db.GetUserByEmail(c.Param("email"))
-			fmt.Println(u)
-			fmt.Println(err)
 			if err := c.ShouldBind(&loginVals); err != nil {
 				return "", jwt.ErrMissingLoginValues
 			}
+			u, err := su.db.GetUserByEmail(loginVals.Email)
+			fmt.Println(u)
+			fmt.Println(err)
+
 			userID := loginVals.Email
 			password := loginVals.Password
 

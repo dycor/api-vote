@@ -53,8 +53,7 @@ func (sql PostgresDB) GetUser(uuid string) (*model.User, error) {
 func (sql PostgresDB) GetUserByEmail(email string) (*model.User, error) {
 	fmt.Println("Test email")
 	var u model.User
-	row := sql.db.Table("user").Where("email", email).Select("first_name").Row()
-	row.Scan(&u.FirstName)
+	sql.db.Where("email = ?", email).First(&u)
 	fmt.Println(u)
 	return nil, nil
 }
