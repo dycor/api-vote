@@ -48,7 +48,13 @@ func InitLogin(r *gin.Engine, port string, db db.Persist) {
 			var loginVals login
 			if err := c.ShouldBind(&loginVals); err != nil {
 				return "", jwt.ErrMissingLoginValues
+				//fmt.Println("err",err)
+
 			}
+
+			fmt.Println("HELLLLLLLLO")
+			fmt.Println(loginVals.Email)
+
 			u, err := su.db.GetUserByEmail(loginVals.Email)
 			fmt.Println(u)
 			fmt.Println(err)
