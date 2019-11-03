@@ -52,16 +52,16 @@ func (sql PostgresDB) GetUser(uuid string) (*model.User, error) {
 // GetUser is getting a user from his/here email.
 func (sql PostgresDB) GetUserByEmail(email string) (*model.User, error) {
 	//fmt.Println("----------")
-	fmt.Println("Test email",email)
+	fmt.Println("Test email", email)
 	var u model.User
-	err := sql.db.Where(&model.User{Email : email}).First(&u).Error
+	err := sql.db.Where(&model.User{Email: email}).First(&u).Error
 	//sql.db.Find(&u)
 	//row := sql.db.Select(&model.User{}).Where("email = ?", email).Row()
 	//row.Scan(&u)
-	fmt.Println("----->",u)
+	//fmt.Println("----->", u)
 	//fmt.Println("<<<<<<<----->>>>>>>>",err)
 	//fmt.Println(test)
-	fmt.Println("---------------")
+	//fmt.Println("---------------")
 	return &u, err
 }
 

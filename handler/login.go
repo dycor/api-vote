@@ -10,6 +10,7 @@ import (
 	"github.com/dycor/api-vote/db"
 	"github.com/dycor/api-vote/model"
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type login struct {
@@ -48,23 +49,17 @@ func InitLogin(r *gin.Engine, port string, db db.Persist) {
 			var loginVals login
 			if err := c.ShouldBind(&loginVals); err != nil {
 				return "", jwt.ErrMissingLoginValues
-				//fmt.Println("err",err)
-
 			}
-
-			fmt.Println("HELLLLLLLLO")
-			fmt.Println(loginVals.Email)
-
 			u, err := su.db.GetUserByEmail(loginVals.Email)
-			fmt.Println(u)
+			//fmt.Println(u.Password)
 			fmt.Println(err)
 
-			userID := loginVals.Email
-			password := loginVals.Password
+			passwordUser := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(loginVals.Password))
 
-			if userID == "test@gmail.com" && password == "test" {
+			if loginVals.Email == u.Email && passwordUser == nil {
+				//Pas sur de ce que ca doit retourner hihihi
 				return &model.User{
-					Email:     userID,
+					Email:     loginVals.Email,
 					LastName:  "Test",
 					FirstName: "Test",
 				}, nil
@@ -73,7 +68,8 @@ func InitLogin(r *gin.Engine, port string, db db.Persist) {
 			return nil, jwt.ErrFailedAuthentication
 		},
 		Authorizator: func(data interface{}, c *gin.Context) bool {
-			if v, ok := data.(*model.User); ok && v.Email == "test@gmail.com" {
+			var loginVals login
+			if v, ok := data.(*model.User); ok && v.Email == loginVals.Email {
 				return true
 			}
 
