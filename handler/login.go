@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -50,9 +49,9 @@ func InitLogin(r *gin.Engine, port string, db db.Persist) {
 			if err := c.ShouldBind(&loginVals); err != nil {
 				return "", jwt.ErrMissingLoginValues
 			}
-			u, err := su.db.GetUserByEmail(loginVals.Email)
-			//fmt.Println(u.Password)
-			fmt.Println(err)
+			u, _ := su.db.GetUserByEmail(loginVals.Email)
+			// Pour afficher l'erreur, remplacer _ par err et décommenter
+			// fmt.Println(err)
 
 			passwordUser := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(loginVals.Password))
 
