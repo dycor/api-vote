@@ -54,6 +54,8 @@ func (sql PostgresDB) GetUserByEmail(email string) (*model.User, error) {
 	fmt.Println("Test email")
 	var u model.User
 	sql.db.Where("email = ?", email).First(&u)
+	row := sql.db.Select(&model.User{}).Where("email = ?", email).Row()
+	row.Scan(&u)
 	fmt.Println(u)
 	return nil, nil
 }
