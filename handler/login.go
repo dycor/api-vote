@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -18,6 +19,36 @@ type login struct {
 }
 
 var identityKey = "id"
+
+func GetToken(c *gin.Context) string {
+	token, exists := c.Get("JWT_TOKEN")
+	if !exists {
+		return ""
+	}
+	return token.(string)
+}
+
+func helloHandler(c *gin.Context) {
+	c.JSON(200, gin.H{
+		"text":  "Hello World.",
+		"token": GetToken(c),
+	})
+	token := GetToken(c)
+	fmt.Println("TOKEN ------>")
+	fmt.Println(token)
+}
+
+func HelloWorld(c *gin.Context) {
+	claims := jwt.ExtractClaims(c)
+	fmt.Println("claims ------>")
+	fmt.Println(claims)
+	user, _ := c.Get(identityKey)
+	c.JSON(200, gin.H{
+		"userID": claims[identityKey],
+		"email":  user.(*model.User).Email,
+		"text":   "Hello World.",
+	})
+}
 
 // InitLogin is creating jwt Token for users
 func InitLogin(r *gin.Engine, port string, db db.Persist) {
@@ -80,6 +111,7 @@ func InitLogin(r *gin.Engine, port string, db db.Persist) {
 				"message": message,
 			})
 		},
+
 		// TokenLookup is a string in the form of "<source>:<name>" that is used
 		// to extract token from the request.
 		// Optional. Default value "header:Authorization".
@@ -111,6 +143,7 @@ func InitLogin(r *gin.Engine, port string, db db.Persist) {
 	// Refresh time can be longer than token timeout
 	auth.GET("/refresh_token", authMiddleware.RefreshHandler)
 	auth.Use(authMiddleware.MiddlewareFunc())
+	//auth.GET("/hello2", helloHandler)
 	{
 		auth.GET("/hello", HelloWorld)
 	}
@@ -118,14 +151,4 @@ func InitLogin(r *gin.Engine, port string, db db.Persist) {
 	if err := http.ListenAndServe(":"+port, r); err != nil {
 		log.Fatal(err)
 	}
-}
-
-func HelloWorld(c *gin.Context) {
-	claims := jwt.ExtractClaims(c)
-	user, _ := c.Get(identityKey)
-	c.JSON(200, gin.H{
-		"userID": claims[identityKey],
-		"email":  user.(*model.User).Email,
-		"text":   "Hello World.",
-	})
 }
