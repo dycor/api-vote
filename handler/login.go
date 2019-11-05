@@ -38,14 +38,11 @@ func helloHandler(c *gin.Context) {
 	fmt.Println(token)
 }
 
+// @Path = /auth/hello
 func HelloWorld(c *gin.Context) {
-	claims := jwt.ExtractClaims(c)
-	fmt.Println("claims ------>")
-	fmt.Println(claims)
-	user, _ := c.Get(identityKey)
 	c.JSON(200, gin.H{
-		"userID": claims[identityKey],
-		"email":  user.(*model.User).Email,
+		"userID": "ttetet",
+		"email":  "tet",
 		"text":   "Hello World.",
 	})
 }
@@ -71,10 +68,11 @@ func InitLogin(r *gin.Engine, port string, db db.Persist) {
 		},
 		IdentityHandler: func(c *gin.Context) interface{} {
 			claims := jwt.ExtractClaims(c)
-			return &model.User{
-				Email: claims[identityKey].(string),
-			}
+			// pas sur de ca
+			u, _ := su.db.GetUserByEmail(claims[identityKey].(string))
+			return u
 		},
+		// La route /login
 		Authenticator: func(c *gin.Context) (interface{}, error) {
 			var loginVals login
 			if err := c.ShouldBind(&loginVals); err != nil {
@@ -85,11 +83,10 @@ func InitLogin(r *gin.Engine, port string, db db.Persist) {
 			// fmt.Println(err)
 
 			passwordUser := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(loginVals.Password))
-
 			if loginVals.Email == u.Email && passwordUser == nil {
 				//Pas sur de ce que ca doit retourner hihihi
 				return &model.User{
-					Email:     loginVals.Email,
+					Email:     u.Email,
 					LastName:  "Test",
 					FirstName: "Test",
 				}, nil
@@ -97,9 +94,9 @@ func InitLogin(r *gin.Engine, port string, db db.Persist) {
 
 			return nil, jwt.ErrFailedAuthentication
 		},
+		// Cette fonction permet de passer outre le jwt == Si email == l'adresse indiqué, alors il a automatiquement le droit
 		Authorizator: func(data interface{}, c *gin.Context) bool {
-			var loginVals login
-			if v, ok := data.(*model.User); ok && v.Email == loginVals.Email {
+			if v, ok := data.(*model.User); ok && v.Email == "admin@gmail.com" {
 				return true
 			}
 
@@ -145,6 +142,7 @@ func InitLogin(r *gin.Engine, port string, db db.Persist) {
 	auth.Use(authMiddleware.MiddlewareFunc())
 	//auth.GET("/hello2", helloHandler)
 	{
+		// @path /auth/hello
 		auth.GET("/hello", HelloWorld)
 	}
 
