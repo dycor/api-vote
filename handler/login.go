@@ -58,6 +58,7 @@ func InitLogin(r *gin.Engine, port string, db db.Persist) {
 		Timeout:     time.Hour,
 		MaxRefresh:  time.Hour,
 		IdentityKey: identityKey,
+		// Permet la construction du token. Il faudra éventuellement donner l'accesslevel
 		PayloadFunc: func(data interface{}) jwt.MapClaims {
 			if v, ok := data.(*model.User); ok {
 				return jwt.MapClaims{
@@ -66,13 +67,13 @@ func InitLogin(r *gin.Engine, port string, db db.Persist) {
 			}
 			return jwt.MapClaims{}
 		},
+		// Permet d'identifier le token, l'interface retournée est ensuite envoyé à "Authorizator"
 		IdentityHandler: func(c *gin.Context) interface{} {
 			claims := jwt.ExtractClaims(c)
-			// pas sur de ca
 			u, _ := su.db.GetUserByEmail(claims[identityKey].(string))
 			return u
 		},
-		// La route /login
+		// La route /login, permet de donner le jwt token
 		Authenticator: func(c *gin.Context) (interface{}, error) {
 			var loginVals login
 			if err := c.ShouldBind(&loginVals); err != nil {
@@ -84,24 +85,28 @@ func InitLogin(r *gin.Engine, port string, db db.Persist) {
 
 			passwordUser := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(loginVals.Password))
 			if loginVals.Email == u.Email && passwordUser == nil {
-				//Pas sur de ce que ca doit retourner hihihi
 				return &model.User{
 					Email:     u.Email,
-					LastName:  "Test",
-					FirstName: "Test",
+					LastName:  "Incomplet",
+					FirstName: "Incomplet",
 				}, nil
 			}
 
 			return nil, jwt.ErrFailedAuthentication
 		},
-		// Cette fonction permet de passer outre le jwt == Si email == l'adresse indiqué, alors il a automatiquement le droit
+		// Donne l'autorisation d'accès ou non. Petite particularité, si l'email du token est "admin@gmail.com" alors on donne le droit tout de même
 		Authorizator: func(data interface{}, c *gin.Context) bool {
-			if v, ok := data.(*model.User); ok && v.Email == "admin@gmail.com" {
+			v, ok := data.(*model.User)
+			fmt.Println(v)
+			fmt.Println(ok)
+			fmt.Println(v.AccessLevel)
+			if v, ok := data.(*model.User); ok && v.AccessLevel >= 2 || v.Email == "admin@gmail.com" {
 				return true
 			}
 
 			return false
 		},
+		// permet de donner le code et le message d'erreur
 		Unauthorized: func(c *gin.Context, code int, message string) {
 			c.JSON(code, gin.H{
 				"code":    code,
@@ -136,11 +141,12 @@ func InitLogin(r *gin.Engine, port string, db db.Persist) {
 		c.JSON(404, gin.H{"code": "PAGE_NOT_FOUND", "message": "Page not found"})
 	})
 
+	// Création d'un groupe de route, les routes faites à partir de auth prendront automatiquement "/auth" devant.
 	auth := r.Group("/auth")
 	// Refresh time can be longer than token timeout
 	auth.GET("/refresh_token", authMiddleware.RefreshHandler)
+	// Création des routes protégées à l'intérieur de cette route
 	auth.Use(authMiddleware.MiddlewareFunc())
-	//auth.GET("/hello2", helloHandler)
 	{
 		// @path /auth/hello
 		auth.GET("/hello", HelloWorld)
