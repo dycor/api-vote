@@ -19,6 +19,7 @@ type login struct {
 }
 
 var identityKey = "id"
+var accessLevel = "0"
 
 func GetToken(c *gin.Context) string {
 	token, exists := c.Get("JWT_TOKEN")
@@ -63,6 +64,7 @@ func InitLogin(r *gin.Engine, port string, db db.Persist) {
 			if v, ok := data.(*model.User); ok {
 				return jwt.MapClaims{
 					identityKey: v.Email,
+					accessLevel: v.AccessLevel,
 				}
 			}
 			return jwt.MapClaims{}
@@ -86,9 +88,10 @@ func InitLogin(r *gin.Engine, port string, db db.Persist) {
 			passwordUser := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(loginVals.Password))
 			if loginVals.Email == u.Email && passwordUser == nil {
 				return &model.User{
-					Email:     u.Email,
-					LastName:  "Incomplet",
-					FirstName: "Incomplet",
+					Email:       u.Email,
+					LastName:    "Incomplet",
+					FirstName:   "Incomplet",
+					AccessLevel: u.AccessLevel,
 				}, nil
 			}
 
