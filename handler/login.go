@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -29,17 +28,10 @@ func GetToken(c *gin.Context) string {
 	return token.(string)
 }
 
-func helloHandler(c *gin.Context) {
-	c.JSON(200, gin.H{
-		"text":  "Hello World.",
-		"token": GetToken(c),
-	})
-	token := GetToken(c)
-	fmt.Println("TOKEN ------>")
-	fmt.Println(token)
-}
-
-// @Path = /auth/hello
+/**
+This route is using to test authentication with JWT token on our app
+@Path("/auth/hello")
+*/
 func HelloWorld(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"userID": "ttetet",
@@ -48,7 +40,9 @@ func HelloWorld(c *gin.Context) {
 	})
 }
 
-// InitLogin is creating jwt Token for users
+/**
+@Func InitLogin manage authentication of users with JWT token
+*/
 func InitLogin(r *gin.Engine, port string, db db.Persist) {
 	su := ServiceUser{
 		db: db,
@@ -59,7 +53,10 @@ func InitLogin(r *gin.Engine, port string, db db.Persist) {
 		Timeout:     time.Hour,
 		MaxRefresh:  time.Hour,
 		IdentityKey: identityKey,
-		// Permet la construction du token. Il faudra éventuellement donner l'accesslevel
+		/**
+		@Func PayloadFunc is creating jwt token
+		@Return JWT token
+		*/
 		PayloadFunc: func(data interface{}) jwt.MapClaims {
 			if v, ok := data.(*model.User); ok {
 				return jwt.MapClaims{
@@ -69,21 +66,25 @@ func InitLogin(r *gin.Engine, port string, db db.Persist) {
 			}
 			return jwt.MapClaims{}
 		},
-		// Permet d'identifier le token, l'interface retournée est ensuite envoyé à "Authorizator"
+		/**
+		@Func IdentityHandler extract user's identity in JWT token
+		@Return User interface (used by Authorizator)
+		*/
 		IdentityHandler: func(c *gin.Context) interface{} {
 			claims := jwt.ExtractClaims(c)
 			u, _ := su.db.GetUserByEmail(claims[identityKey].(string))
 			return u
 		},
-		// La route /login, permet de donner le jwt token
+		/**
+		@Func Authenticator check if user exist.
+		@Return User interface (used by PayloadFunc to create JWT token)
+		*/
 		Authenticator: func(c *gin.Context) (interface{}, error) {
 			var loginVals login
 			if err := c.ShouldBind(&loginVals); err != nil {
 				return "", jwt.ErrMissingLoginValues
 			}
 			u, _ := su.db.GetUserByEmail(loginVals.Email)
-			// Pour afficher l'erreur, remplacer _ par err et décommenter.
-			// fmt.Println(err)
 
 			passwordUser := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(loginVals.Password))
 			if loginVals.Email == u.Email && passwordUser == nil {
@@ -97,7 +98,12 @@ func InitLogin(r *gin.Engine, port string, db db.Persist) {
 
 			return nil, jwt.ErrFailedAuthentication
 		},
-		// Donne l'autorisation d'accès ou non. Petite particularité, si l'email du token est "admin@gmail.com" alors on donne le droit tout de même
+
+		/**
+		@Func Authorizator check is user can access to the target route
+		If use@r email is "admin@gmail.com", authorizator give all access
+		@Return bool
+		*/
 		Authorizator: func(data interface{}, c *gin.Context) bool {
 			if v, ok := data.(*model.User); ok && v.AccessLevel >= 2 || v.Email == "admin@gmail.com" {
 				return true
@@ -105,7 +111,9 @@ func InitLogin(r *gin.Engine, port string, db db.Persist) {
 
 			return false
 		},
-		// permet de donner le code et le message d'erreur
+		/**
+		@Func Unauthorized construct error response
+		*/
 		Unauthorized: func(c *gin.Context, code int, message string) {
 			c.JSON(code, gin.H{
 				"code":    code,
@@ -140,11 +148,15 @@ func InitLogin(r *gin.Engine, port string, db db.Persist) {
 		c.JSON(404, gin.H{"code": "PAGE_NOT_FOUND", "message": "Page not found"})
 	})
 
-	// Création d'un groupe de route, les routes faites à partir de auth prendront automatiquement "/auth" devant.
+	/**
+	Create group "/auth". All routes mapped by auth take "/auth" ahead
+	*/
 	auth := r.Group("/auth")
 	// Refresh time can be longer than token timeout
 	auth.GET("/refresh_token", authMiddleware.RefreshHandler)
-	// Création des routes protégées à l'intérieur de cette route
+	/**
+	Protected routes
+	*/
 	auth.Use(authMiddleware.MiddlewareFunc())
 	{
 		// @path /auth/hello
