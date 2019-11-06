@@ -96,10 +96,6 @@ func InitLogin(r *gin.Engine, port string, db db.Persist) {
 		},
 		// Donne l'autorisation d'accès ou non. Petite particularité, si l'email du token est "admin@gmail.com" alors on donne le droit tout de même
 		Authorizator: func(data interface{}, c *gin.Context) bool {
-			v, ok := data.(*model.User)
-			fmt.Println(v)
-			fmt.Println(ok)
-			fmt.Println(v.AccessLevel)
 			if v, ok := data.(*model.User); ok && v.AccessLevel >= 2 || v.Email == "admin@gmail.com" {
 				return true
 			}
