@@ -80,7 +80,7 @@ func InitLogin(r *gin.Engine, port string, db db.Persist) {
 				return "", jwt.ErrMissingLoginValues
 			}
 			u, _ := su.db.GetUserByEmail(loginVals.Email)
-			// Pour afficher l'erreur, remplacer _ par err et décommenter
+			// Pour afficher l'erreur, remplacer _ par err et décommenter.
 			// fmt.Println(err)
 
 			passwordUser := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(loginVals.Password))
