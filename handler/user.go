@@ -9,10 +9,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 	uuid "github.com/satori/go.uuid"
-	"gopkg.in/go-playground/validator.v9"
 	"golang.org/x/crypto/bcrypt"
-
+	"gopkg.in/go-playground/validator.v9"
 )
+
 var validate *validator.Validate
 
 // InitUser is creating the endpoints for the entity User.
@@ -41,6 +41,7 @@ func (su ServiceUser) GetUserHandler(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, u)
 }
+
 //
 //// DeleteUserHandler is deleting a user from the given uuid param.
 //func (su ServiceUser) DeleteUserHandler(ctx *gin.Context) {
@@ -75,8 +76,6 @@ func (su ServiceUser) GetUserHandler(ctx *gin.Context) {
 //	ctx.JSON(http.StatusOK, us)
 //}
 
-
-
 // Hash the password
 func HashPassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
@@ -92,16 +91,14 @@ func (su ServiceUser) PostUserHandler(ctx *gin.Context) {
 		return
 	}
 
-	if matched, _ := regexp.Match(`\s|[0-9]+`, []byte(u.FirstName));matched {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error" :"Firstname can't contain numbers and whitespace "})
+	if matched, _ := regexp.Match(`\s|[0-9]+`, []byte(u.FirstName)); matched {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Firstname can't contain numbers and whitespace "})
 		return
 	}
-	if matched, _ := regexp.Match(`\s|[0-9]+`, []byte(u.LastName));matched {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error" :"LastName can't contain numbers and whitespace "})
+	if matched, _ := regexp.Match(`\s|[0-9]+`, []byte(u.LastName)); matched {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "LastName can't contain numbers and whitespace "})
 		return
 	}
-
-
 
 	validate = validator.New()
 	if err := validate.Struct(u); err != nil {
@@ -109,9 +106,9 @@ func (su ServiceUser) PostUserHandler(ctx *gin.Context) {
 		return
 	}
 
-	var err error;
+	var err error
 	u.Password, err = HashPassword(u.Password)
-	if  err != nil {
+	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -119,5 +116,5 @@ func (su ServiceUser) PostUserHandler(ctx *gin.Context) {
 	u.UUID = uuid.NewV4().String()
 	su.db.AddUser(&u)
 	ctx.JSON(http.StatusOK, u)
-}
 
+}
