@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"regexp"
 
@@ -117,4 +118,8 @@ func (su ServiceUser) PostUserHandler(ctx *gin.Context) {
 	su.db.AddUser(&u)
 	ctx.JSON(http.StatusOK, u)
 
+}
+
+func (su ServiceUser) DeleteUserHandler(ctx *gin.Context) {
+	fmt.Println(ctx.Param("uuid"))
 }
