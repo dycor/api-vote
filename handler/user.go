@@ -121,5 +121,12 @@ func (su ServiceUser) PostUserHandler(ctx *gin.Context) {
 }
 
 func (su ServiceUser) DeleteUserHandler(ctx *gin.Context) {
-	fmt.Println(ctx.Param("uuid"))
+	fmt.Println("Coucou")
+	u, err := su.db.GetUser(ctx.Param("uuid"))
+	if err != nil {
+		fmt.Printf("inexistant")
+		ctx.JSON(http.StatusBadRequest, err)
+	}
+	fmt.Println(u)
+	ctx.JSON(http.StatusOK, u)
 }

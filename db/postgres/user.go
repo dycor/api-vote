@@ -36,6 +36,7 @@ func (sql PostgresDB) AddUser(u *model.User) error {
 
 // DeleteUser is delting a user from the given UUID.
 func (sql PostgresDB) DeleteUser(uuid string) error {
+
 	return nil
 }
 
@@ -46,7 +47,9 @@ func (sql PostgresDB) UpdateUser(uuid string, u model.User) error {
 
 // GetUser is getting a user from his/here uuid.
 func (sql PostgresDB) GetUser(uuid string) (*model.User, error) {
-	return nil, nil
+	var u model.User
+	err := sql.db.Where(&model.User{UUID: uuid}).First(&u).Error
+	return &u, err
 }
 
 // GetUser is getting a user from his/here email.
