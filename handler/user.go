@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 	"regexp"
 
@@ -122,10 +121,12 @@ func (su ServiceUser) PostUserHandler(ctx *gin.Context) {
 
 func (su ServiceUser) DeleteUserHandler(ctx *gin.Context) {
 	u, err := su.db.GetUser(ctx.Param("uuid"))
-	fmt.Println(err)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	ctx.JSON(http.StatusOK, u)
+	if err := su.db.DeleteUser(ctx.Param("uuid")); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	}
+	ctx.JSON(http.StatusOK, gin.H{"message": "User " + u.FirstName + " with UUID " + ctx.Param("uuid") + " has been deleted"})
 }
