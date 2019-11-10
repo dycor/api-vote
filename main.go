@@ -2,6 +2,7 @@ package main
 
 import (
 	//"github.com/dycor/api-vote/db/sqlite"
+
 	"github.com/dycor/api-vote/db/postgres"
 	"github.com/dycor/api-vote/handler"
 
@@ -11,6 +12,7 @@ import (
 var port string
 
 func main() {
+
 	r := gin.Default()
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
@@ -19,7 +21,8 @@ func main() {
 		port = "8080"
 	}
 
-	handler.InitUser(r,postgres.New())
+	handler.InitUser(r, postgres.New())
+	handler.InitVote(r, postgres.New())
 	handler.InitLogin(r, port, postgres.New())
 	r.Run(":" + port)
 }

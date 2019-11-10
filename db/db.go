@@ -14,6 +14,11 @@ type Persist interface {
 	GetUser(uuid string) (*model.User, error)
 	GetUserByEmail(email string) (*model.User, error)
 	GetAllUser() (map[string]model.User, error)
+	AddVote(v *model.Vote) error
+	DeleteVote(uuid string) error
+	UpdateVote(uuid string, v model.Vote) error
+	GetVote(uuid string) (*model.Vote, error)
+	GetAllVote() (map[string]model.Vote, error)
 }
 
 // ErrUserNotFound is used if a user is not found into the DB.
