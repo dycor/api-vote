@@ -105,7 +105,7 @@ func InitLogin(r *gin.Engine, port string, db db.Persist) {
 		@Return bool
 		*/
 		Authorizator: func(data interface{}, c *gin.Context) bool {
-			if v, ok := data.(*model.User); ok && v.AccessLevel >= 2 || v.Email == "admin@gmail.com" {
+			if _, ok := data.(*model.User); ok {
 				return true
 			}
 
