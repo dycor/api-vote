@@ -151,7 +151,7 @@ func InitLogin(r *gin.Engine, port string, db db.Persist) {
 	/**
 	Create group "/auth". All routes mapped by auth take "/auth" ahead
 	*/
-	auth := r.Group("/auth")
+	auth := r.Group("")
 	// Refresh time can be longer than token timeout
 	auth.GET("/refresh_token", AuthMiddleware.RefreshHandler)
 	/**

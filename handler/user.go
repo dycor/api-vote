@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"regexp"
 
@@ -22,7 +23,7 @@ func InitUser(r *gin.Engine, db db.Persist) {
 	}
 	r.GET("/users/:uuid", su.GetUserHandler)
 	//r.DELETE("/users/:uuid", su.DeleteUserHandler)
-	//r.PUT("/users/:uuid", su.PutUserHandler)
+	r.PUT("/users/:uuid", su.PutUserHandler)
 	//r.GET("/users", su.GetAllUserHandler)
 	r.POST("/users", su.PostUserHandler)
 }
@@ -52,23 +53,55 @@ func (su ServiceUser) GetUserHandler(ctx *gin.Context) {
 //	}
 //	ctx.JSON(http.StatusOK, nil)
 //}
-//
-//// PutUserHandler is updating a user from the given uuid param.
-//func (su ServiceUser) PutUserHandler(ctx *gin.Context) {
-//
-//	var newUser model.User
-//	if err := ctx.BindJSON(&newUser); err != nil {
-//		ctx.JSON(http.StatusBadRequest, nil)
-//		return
-//	}
-//	uuid := ctx.Param("uuid")
-//	if err := su.db.UpdateUser(uuid, newUser); err != nil {
-//		ctx.JSON(http.StatusInternalServerError, nil)
-//		return
-//	}
-//	u, _ := su.db.GetUser(uuid)
-//	ctx.JSON(http.StatusOK, u)
-//}
+
+// PutUserHandler is updating a user from the given uuid param.
+func (su ServiceUser) PutUserHandler(ctx *gin.Context) {
+	//token, _ := ctx.Get("JWT_TOKEN")
+	//claims := jwt.ExtractClaims(ctx)
+	//fmt.Println("Test",claims["accessLevel"],token)
+	var newUser model.User
+	if err := ctx.BindJSON(&newUser); err != nil {
+		ctx.JSON(http.StatusBadRequest, nil)
+		return
+	}
+
+	if matched, _ := regexp.Match(`\s|[0-9]+`, []byte(newUser.FirstName)); matched {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Firstname can't contain numbers and whitespace "})
+		return
+	}
+	if matched, _ := regexp.Match(`\s|[0-9]+`, []byte(newUser.LastName)); matched {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "LastName can't contain numbers and whitespace "})
+		return
+	}
+
+	uuid := ctx.Param("uuid")
+
+	if u, error := su.db.GetUser(uuid); error != nil {
+		ctx.JSON(http.StatusInternalServerError, "User doesn't exist")
+		return
+	} else {
+		if newUser.FirstName != ""{
+			u.FirstName = newUser.FirstName
+		}
+
+		if newUser.LastName != ""{
+			u.LastName = newUser.LastName
+		}
+
+		if newUser.Email != ""{
+			u.Email = newUser.Email
+		}
+
+		if user, err := su.db.UpdateUser(uuid, u); err != nil {
+			ctx.JSON(http.StatusInternalServerError, "update failed")
+			return
+		} else {
+			fmt.Println("user",user)
+			ctx.JSON(http.StatusOK, u)
+			return
+		}
+	}
+}
 
 // GetAllUserHandler is retriving all users from the database.
 //func (su ServiceUser) GetAllUserHandler(ctx *gin.Context) {

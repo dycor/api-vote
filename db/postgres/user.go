@@ -46,8 +46,10 @@ func (sql PostgresDB) DeleteUser(uuid string) error {
 }
 
 // UpdateUser is updating a user from his/here uuid
-func (sql PostgresDB) UpdateUser(uuid string, u model.User) error {
-	return nil
+func (sql PostgresDB) UpdateUser(uuid string, u *model.User) (*model.User, error)  {
+	var user model.User
+	err := sql.db.Model(&user).Where("uuid = ?", uuid).Updates(&u).Error
+	return &user, err
 }
 
 // GetUser is getting a user from his/here uuid.
