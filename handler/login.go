@@ -47,7 +47,7 @@ func InitLogin(r *gin.Engine, port string, db db.Persist) {
 	su := ServiceUser{
 		db: db,
 	}
-	authMiddleware, _ := jwt.New(&jwt.GinJWTMiddleware{
+	AuthMiddleware, _ := jwt.New(&jwt.GinJWTMiddleware{
 		Realm:       "test zone",
 		Key:         []byte("secret key"),
 		Timeout:     time.Hour,
@@ -140,9 +140,9 @@ func InitLogin(r *gin.Engine, port string, db db.Persist) {
 		TimeFunc: time.Now,
 	})
 
-	r.POST("/login", authMiddleware.LoginHandler)
+	r.POST("/login", AuthMiddleware.LoginHandler)
 
-	r.NoRoute(authMiddleware.MiddlewareFunc(), func(c *gin.Context) {
+	r.NoRoute(AuthMiddleware.MiddlewareFunc(), func(c *gin.Context) {
 		claims := jwt.ExtractClaims(c)
 		log.Printf("NoRoute claims: %#v\n", claims)
 		c.JSON(404, gin.H{"code": "PAGE_NOT_FOUND", "message": "Page not found"})
@@ -153,17 +153,30 @@ func InitLogin(r *gin.Engine, port string, db db.Persist) {
 	*/
 	auth := r.Group("/auth")
 	// Refresh time can be longer than token timeout
-	auth.GET("/refresh_token", authMiddleware.RefreshHandler)
+	auth.GET("/refresh_token", AuthMiddleware.RefreshHandler)
 	/**
 	Protected routes
 	*/
-	auth.Use(authMiddleware.MiddlewareFunc())
+	auth.Use(AuthMiddleware.MiddlewareFunc())
 	{
 		// @path /auth/hello
 		auth.GET("/hello", HelloWorld)
+
+		// Create UserGroupe protected Routes
+		usersRoute := auth.Group("/user")
+
+		// @path /auth/user/delete/:uuid
+		usersRoute.DELETE("/delete/:uuid", su.DeleteUserHandler)
 	}
 
 	if err := http.ListenAndServe(":"+port, r); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func GetAccessLevelJwt(c *gin.Context) int {
+	claims := jwt.ExtractClaims(c)
+	accessLevel := claims[accessLevel].(float64)
+	var intAccessLevel int = int(accessLevel)
+	return intAccessLevel
 }

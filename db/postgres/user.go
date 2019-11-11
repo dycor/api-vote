@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/dycor/api-vote/db"
 	"github.com/dycor/api-vote/model"
@@ -36,6 +37,11 @@ func (sql PostgresDB) AddUser(u *model.User) error {
 
 // DeleteUser is delting a user from the given UUID.
 func (sql PostgresDB) DeleteUser(uuid string) error {
+	t := time.Now()
+	err := sql.db.Exec("UPDATE users SET deleted_at=$1 WHERE uuid=$2", t, uuid)
+	if err.Error != nil {
+		return err.Error
+	}
 	return nil
 }
 
@@ -46,7 +52,9 @@ func (sql PostgresDB) UpdateUser(uuid string, u model.User) error {
 
 // GetUser is getting a user from his/here uuid.
 func (sql PostgresDB) GetUser(uuid string) (*model.User, error) {
-	return nil, nil
+	var u model.User
+	err := sql.db.Where(&model.User{UUID: uuid}).First(&u).Error
+	return &u, err
 }
 
 // GetUser is getting a user from his/here email.
