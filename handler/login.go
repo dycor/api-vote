@@ -160,14 +160,17 @@ func InitLogin(r *gin.Engine, port string, db db.Persist) {
 	*/
 	auth.Use(AuthMiddleware.MiddlewareFunc())
 	{
-		// @path /auth/hello
+		// @path /hello
 		auth.GET("/hello", HelloWorld)
 
-		// Create UserGroupe protected Routes
-		usersRoute := auth.Group("/user")
+		// Create UserGroup protected Routes
+		usersRoute := auth.Group("/users")
 
-		// @path /auth/user/delete/:uuid
+		// @path /user/delete/:uuid
 		usersRoute.DELETE("/delete/:uuid", su.DeleteUserHandler)
+
+		// @path /user/:uuid
+		usersRoute.PUT("/:uuid", su.PutUserHandler)
 	}
 
 	if err := http.ListenAndServe(":"+port, r); err != nil {

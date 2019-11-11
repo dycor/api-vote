@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 	"regexp"
 
@@ -22,9 +21,6 @@ func InitUser(r *gin.Engine, db db.Persist) {
 		db: db,
 	}
 	r.GET("/users/:uuid", su.GetUserHandler)
-	//r.DELETE("/users/:uuid", su.DeleteUserHandler)
-	r.PUT("/users/:uuid", su.PutUserHandler)
-	//r.GET("/users", su.GetAllUserHandler)
 	r.POST("/users", su.PostUserHandler)
 }
 
@@ -43,26 +39,10 @@ func (su ServiceUser) GetUserHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, u)
 }
 
-//
-//// DeleteUserHandler is deleting a user from the given uuid param.
-//func (su ServiceUser) DeleteUserHandler(ctx *gin.Context) {
-//	err := su.db.DeleteUser(ctx.Param("uuid"))
-//	if err != nil {
-//		ctx.JSON(http.StatusInternalServerError, nil)
-//		return
-//	}
-//	ctx.JSON(http.StatusOK, nil)
-//}
-
 // PutUserHandler is updating a user from the given uuid param.
 func (su ServiceUser) PutUserHandler(ctx *gin.Context) {
-	//token, _ := ctx.Get("JWT_TOKEN")
-	//claims := jwt.ExtractClaims(ctx)
-	//fmt.Println("Test",claims["accessLevel"],token)
-	accessLevel := GetAccessLevelJwt(ctx)
-	fmt.Println(accessLevel)
 
-	return
+	accessLevel := GetAccessLevelJwt(ctx)
 
 	if accessLevel != 1 {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "You don't have permissions "})
@@ -112,12 +92,6 @@ func (su ServiceUser) PutUserHandler(ctx *gin.Context) {
 		}
 	}
 }
-
-// GetAllUserHandler is retriving all users from the database.
-//func (su ServiceUser) GetAllUserHandler(ctx *gin.Context) {
-//	us, _ := su.db.GetAllUser()
-//	ctx.JSON(http.StatusOK, us)
-//}
 
 // Hash the password
 func HashPassword(password string) (string, error) {
