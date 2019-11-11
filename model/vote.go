@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/jinzhu/gorm"
+
 )
 
 // Vote is the representation of a client.
@@ -14,5 +15,5 @@ type Vote struct {
 	Desc      string    `json:"desc" validate:"required,min=2"`
 	StartDate time.Time `json:"start_date"`
 	EndDate   time.Time `json:"end_date"`
-	UUIDVote  []string  `json:"uuid_vote"`
+	UUIDVote  []string `json:"uuid_vote" gorm:"type:text[]"`
 }
