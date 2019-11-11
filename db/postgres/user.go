@@ -1,33 +1,11 @@
 package postgres
 
 import (
-	"fmt"
 	"time"
 
-	"github.com/dycor/api-vote/db"
 	"github.com/dycor/api-vote/model"
-	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
-
-type PostgresDB struct {
-	db *gorm.DB
-}
-
-// New is creating a moke to persist data.
-func New() db.Persist {
-	database, err := gorm.Open("postgres", "host=localhost port=5432 user=postgres dbname=mydb password=root sslmode=disable")
-
-	if err != nil {
-		panic(err)
-	}
-	database.AutoMigrate(&model.User{})
-	fmt.Println(database.GetErrors())
-	postgres := PostgresDB{
-		db: database,
-	}
-	return postgres
-}
 
 // AddUser is adding a user into the database.
 func (sql PostgresDB) AddUser(u *model.User) error {
@@ -46,7 +24,7 @@ func (sql PostgresDB) DeleteUser(uuid string) error {
 }
 
 // UpdateUser is updating a user from his/here uuid
-func (sql PostgresDB) UpdateUser(uuid string, u *model.User)  error  {
+func (sql PostgresDB) UpdateUser(uuid string, u *model.User) error {
 	var user model.User
 	return sql.db.Model(&user).Where("uuid = ?", uuid).Updates(&u).Error
 }

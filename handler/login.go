@@ -20,6 +20,7 @@ type login struct {
 
 var identityKey = "id"
 var accessLevel = "0"
+var idUser = ""
 
 func GetToken(c *gin.Context) string {
 	token, exists := c.Get("JWT_TOKEN")
@@ -48,6 +49,9 @@ func InitLogin(r *gin.Engine, port string, db db.Persist) {
 	su := ServiceUser{
 		db: db,
 	}
+	sv := ServiceVote{
+		db: db,
+	}
 	AuthMiddleware, _ := jwt.New(&jwt.GinJWTMiddleware{
 		Realm:       "test zone",
 		Key:         []byte("secret key"),
@@ -63,6 +67,7 @@ func InitLogin(r *gin.Engine, port string, db db.Persist) {
 				return jwt.MapClaims{
 					identityKey: v.Email,
 					accessLevel: v.AccessLevel,
+					idUser:      v.UUID,
 				}
 			}
 			return jwt.MapClaims{}
@@ -94,6 +99,7 @@ func InitLogin(r *gin.Engine, port string, db db.Persist) {
 					LastName:    "Incomplet",
 					FirstName:   "Incomplet",
 					AccessLevel: u.AccessLevel,
+					UUID:        u.UUID,
 				}, nil
 			}
 
@@ -166,11 +172,20 @@ func InitLogin(r *gin.Engine, port string, db db.Persist) {
 		// Create UserGroup protected Routes
 		usersRoute := auth.Group("/users")
 
+		// Create VoteGroup protected Routes
+		votesRoutes := auth.Group("/vote")
+
 		// @path /user/delete/:uuid
 		usersRoute.DELETE("/delete/:uuid", su.DeleteUserHandler)
 
 		// @path /user/:uuid
 		usersRoute.PUT("/:uuid", su.PutUserHandler)
+
+		// @path /auth/vote/post
+		votesRoutes.POST("/post", sv.PostVoteHandler)
+
+		// @path /auth/vote/put/:uuid
+		votesRoutes.PUT("/put/:uuid", sv.PutVoteHandler)
 	}
 
 	if err := http.ListenAndServe(":"+port, r); err != nil {
@@ -180,8 +195,14 @@ func InitLogin(r *gin.Engine, port string, db db.Persist) {
 
 func GetAccessLevelJwt(c *gin.Context) int {
 	claims := jwt.ExtractClaims(c)
-	fmt.Println("claim",claims[accessLevel])
+	fmt.Println("claim", claims[accessLevel])
 	accessLevel := claims[accessLevel].(float64)
 	var intAccessLevel int = int(accessLevel)
 	return intAccessLevel
+}
+
+func GetUUIDJwt(c *gin.Context) string {
+	claims := jwt.ExtractClaims(c)
+	idUser := claims[idUser].(string)
+	return idUser
 }
