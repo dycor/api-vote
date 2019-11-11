@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -151,7 +152,7 @@ func InitLogin(r *gin.Engine, port string, db db.Persist) {
 	/**
 	Create group "/auth". All routes mapped by auth take "/auth" ahead
 	*/
-	auth := r.Group("/auth")
+	auth := r.Group("")
 	// Refresh time can be longer than token timeout
 	auth.GET("/refresh_token", AuthMiddleware.RefreshHandler)
 	/**
@@ -159,14 +160,17 @@ func InitLogin(r *gin.Engine, port string, db db.Persist) {
 	*/
 	auth.Use(AuthMiddleware.MiddlewareFunc())
 	{
-		// @path /auth/hello
+		// @path /hello
 		auth.GET("/hello", HelloWorld)
 
-		// Create UserGroupe protected Routes
-		usersRoute := auth.Group("/user")
+		// Create UserGroup protected Routes
+		usersRoute := auth.Group("/users")
 
-		// @path /auth/user/delete/:uuid
+		// @path /user/delete/:uuid
 		usersRoute.DELETE("/delete/:uuid", su.DeleteUserHandler)
+
+		// @path /user/:uuid
+		usersRoute.PUT("/:uuid", su.PutUserHandler)
 	}
 
 	if err := http.ListenAndServe(":"+port, r); err != nil {
@@ -176,6 +180,7 @@ func InitLogin(r *gin.Engine, port string, db db.Persist) {
 
 func GetAccessLevelJwt(c *gin.Context) int {
 	claims := jwt.ExtractClaims(c)
+	fmt.Println("claim",claims[accessLevel])
 	accessLevel := claims[accessLevel].(float64)
 	var intAccessLevel int = int(accessLevel)
 	return intAccessLevel
