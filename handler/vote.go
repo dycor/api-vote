@@ -38,39 +38,43 @@ func (sv ServiceVote) GetVoteHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, v)
 }
 
-//
-//// DeleteUserHandler is deleting a user from the given uuid param.
-//func (su ServiceUser) DeleteUserHandler(ctx *gin.Context) {
-//	err := su.db.DeleteUser(ctx.Param("uuid"))
-//	if err != nil {
-//		ctx.JSON(http.StatusInternalServerError, nil)
-//		return
-//	}
-//	ctx.JSON(http.StatusOK, nil)
-//}
-//
-//// PutUserHandler is updating a user from the given uuid param.
-//func (su ServiceUser) PutUserHandler(ctx *gin.Context) {
-//
-//	var newUser model.User
-//	if err := ctx.BindJSON(&newUser); err != nil {
-//		ctx.JSON(http.StatusBadRequest, nil)
-//		return
-//	}
-//	uuid := ctx.Param("uuid")
-//	if err := su.db.UpdateUser(uuid, newUser); err != nil {
-//		ctx.JSON(http.StatusInternalServerError, nil)
-//		return
-//	}
-//	u, _ := su.db.GetUser(uuid)
-//	ctx.JSON(http.StatusOK, u)
-//}
+//DeleteVoteHandler is deleting vote from the given uuid param.
+func (sv ServiceVote) DeleteVoteHandler(c *gin.Context) {
+	var v model.Vote
+	err := sv.db.DeleteVote(c.Param("uuid"), v)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, nil)
+		return
+	}
+	c.JSON(http.StatusOK, nil)
+}
 
-// GetAllUserHandler is retriving all users from the database.
-//func (su ServiceUser) GetAllUserHandler(ctx *gin.Context) {
-//	us, _ := su.db.GetAllUser()
-//	ctx.JSON(http.StatusOK, us)
-//}
+///PutVoteHandler is updating a vote from the given uuid param.
+func (sv ServiceVote) PutVoteHandler(ctx *gin.Context) {
+	var newVote model.Vote
+	if err := ctx.BindJSON(&newVote); err != nil {
+		ctx.JSON(http.StatusBadRequest, nil)
+		return
+	}
+	uuid := ctx.Param("uuid")
+	if err := sv.db.UpdateVote(uuid, newVote); err != nil {
+		ctx.JSON(http.StatusInternalServerError, nil)
+		return
+	}
+	v, _ := sv.db.GetVote(uuid)
+	ctx.JSON(http.StatusOK, v)
+}
+
+//GetAllVoteHandler is retriving all users from the database.
+func (sv ServiceVote) GetAllVoteHandler(ctx *gin.Context) {
+	var v []model.Vote
+	err := sv.db.GetAllVote(&v)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	} else {
+		ctx.JSON(http.StatusOK, v)
+	}
+}
 
 // PostVoteHandler is creating a new vote into the database.
 func (sv ServiceVote) PostVoteHandler(ctx *gin.Context) {
