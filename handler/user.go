@@ -59,6 +59,17 @@ func (su ServiceUser) PutUserHandler(ctx *gin.Context) {
 	//token, _ := ctx.Get("JWT_TOKEN")
 	//claims := jwt.ExtractClaims(ctx)
 	//fmt.Println("Test",claims["accessLevel"],token)
+	accessLevel := GetAccessLevelJwt(ctx)
+	fmt.Println(accessLevel)
+
+	return
+
+	if accessLevel != 1 {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "You don't have permissions "})
+		return
+	}
+
+
 	var newUser model.User
 	if err := ctx.BindJSON(&newUser); err != nil {
 		ctx.JSON(http.StatusBadRequest, nil)
@@ -92,11 +103,10 @@ func (su ServiceUser) PutUserHandler(ctx *gin.Context) {
 			u.Email = newUser.Email
 		}
 
-		if user, err := su.db.UpdateUser(uuid, u); err != nil {
+		if  err := su.db.UpdateUser(uuid, u); err != nil {
 			ctx.JSON(http.StatusInternalServerError, "update failed")
 			return
 		} else {
-			fmt.Println("user",user)
 			ctx.JSON(http.StatusOK, u)
 			return
 		}

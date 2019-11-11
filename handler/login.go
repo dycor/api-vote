@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -176,6 +177,7 @@ func InitLogin(r *gin.Engine, port string, db db.Persist) {
 
 func GetAccessLevelJwt(c *gin.Context) int {
 	claims := jwt.ExtractClaims(c)
+	fmt.Println("claim",claims[accessLevel])
 	accessLevel := claims[accessLevel].(float64)
 	var intAccessLevel int = int(accessLevel)
 	return intAccessLevel
