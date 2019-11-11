@@ -17,9 +17,9 @@ func InitVote(r *gin.Engine, db db.Persist) {
 		db: db,
 	}
 	r.GET("/votes/:uuid", sv.GetVoteHandler)
-	//r.DELETE("/users/:uuid", su.DeleteUserHandler)
-	//r.PUT("/users/:uuid", su.PutUserHandler)
-	//r.GET("/users", su.GetAllUserHandler)
+	r.DELETE("/votes/:uuid", sv.DeleteVoteHandler)
+	r.PUT("/votes/:uuid", sv.PutVoteHandler)
+	r.GET("/votes", sv.GetAllVoteHandler)
 	r.POST("/votes", sv.PostVoteHandler)
 }
 
