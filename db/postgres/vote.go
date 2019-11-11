@@ -12,12 +12,14 @@ func (sql PostgresDB) AddVote(v *model.Vote) error {
 }
 
 // DeleteVote is delting a vote from the given UUID.
-func (sql PostgresDB) DeleteVote(uuid string) error {
+func (sql PostgresDB) DeleteVote(uuid string, v model.Vote) error {
+	sql.db.Where(&model.Vote{UUID: uuid}).Delete(v)
 	return nil
 }
 
 // UpdateVote is updating a vote from his/here uuid
 func (sql PostgresDB) UpdateVote(uuid string, v model.Vote) error {
+	sql.db.Where(&model.Vote{UUID: uuid}).Save(v)
 	return nil
 }
 
@@ -29,6 +31,9 @@ func (sql PostgresDB) GetVote(uuid string) (*model.Vote, error) {
 }
 
 // GetAllVote is retriving all vote form the database.
-func (sql PostgresDB) GetAllVote() (map[string]model.Vote, error) {
-	return nil, nil
+func (sql PostgresDB) GetAllVote(v *[]model.Vote) (err error) {
+	if err = sql.db.Find(v).Error; err != nil {
+		return err
+	}
+	return nil
 }
