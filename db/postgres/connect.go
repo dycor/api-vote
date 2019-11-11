@@ -20,8 +20,7 @@ func New() db.Persist {
 	if err != nil {
 		panic(err)
 	}
-	database.AutoMigrate(&model.User{})
-	database.AutoMigrate(&model.Vote{})
+	database.AutoMigrate(&model.User{}, &model.Vote{})
 
 	fmt.Println(database.GetErrors())
 	postgres := PostgresDB{
