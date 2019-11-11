@@ -19,6 +19,7 @@ type login struct {
 
 var identityKey = "id"
 var accessLevel = "0"
+var idUser = ""
 
 func GetToken(c *gin.Context) string {
 	token, exists := c.Get("JWT_TOKEN")
@@ -47,6 +48,9 @@ func InitLogin(r *gin.Engine, port string, db db.Persist) {
 	su := ServiceUser{
 		db: db,
 	}
+	sv := ServiceVote{
+		db: db,
+	}
 	AuthMiddleware, _ := jwt.New(&jwt.GinJWTMiddleware{
 		Realm:       "test zone",
 		Key:         []byte("secret key"),
@@ -62,6 +66,7 @@ func InitLogin(r *gin.Engine, port string, db db.Persist) {
 				return jwt.MapClaims{
 					identityKey: v.Email,
 					accessLevel: v.AccessLevel,
+					idUser:      v.UUID,
 				}
 			}
 			return jwt.MapClaims{}
@@ -165,8 +170,15 @@ func InitLogin(r *gin.Engine, port string, db db.Persist) {
 		// Create UserGroupe protected Routes
 		usersRoute := auth.Group("/user")
 
+		votesRoute := auth.Group("/vote")
+
 		// @path /auth/user/delete/:uuid
 		usersRoute.DELETE("/delete/:uuid", su.DeleteUserHandler)
+
+		// @path /auth/vote/post
+		votesRoute.POST("/post", sv.PostVoteHandler)
+		// @path /auth/vote/put/:uuid
+		votesRoute.PUT("/put/:uuid", sv.PutVoteHandler)
 	}
 
 	if err := http.ListenAndServe(":"+port, r); err != nil {
@@ -179,4 +191,10 @@ func GetAccessLevelJwt(c *gin.Context) int {
 	accessLevel := claims[accessLevel].(float64)
 	var intAccessLevel int = int(accessLevel)
 	return intAccessLevel
+}
+
+func GetUUIDJwt(c *gin.Context) string {
+	claims := jwt.ExtractClaims(c)
+	idUser := claims[idUser].(string)
+	return idUser
 }

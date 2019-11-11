@@ -52,41 +52,56 @@ func (sv ServiceVote) DeleteVoteHandler(c *gin.Context) {
 
 ///PutVoteHandler is updating a vote from the given uuid param.
 func (sv ServiceVote) PutVoteHandler(ctx *gin.Context) {
-	var newVote model.Vote
-	if err := ctx.BindJSON(&newVote); err != nil {
-		ctx.JSON(http.StatusBadRequest, nil)
-		return
-	}
-	uuid := ctx.Param("uuid")
-
-	/*if err := sv.db.UpdateVote(uuid, v); err != nil {
-		ctx.JSON(http.StatusInternalServerError, nil)
-		return
-	}
-	vote, _ := sv.db.GetVote(uuid)
-	ctx.JSON(http.StatusOK, vote)
-	*/
-	if v, error := sv.db.GetVote(uuid); error != nil {
-		ctx.JSON(http.StatusInternalServerError, "Vote unknown")
-		return
-	} else {
-		if newVote.Title != "" {
-			v.Title = newVote.Title
-		}
-
-		if newVote.Desc != "" {
-			v.Desc = newVote.Desc
-		}
-
-		if vote, err := sv.db.UpdateVote(uuid, v); err != nil {
-			ctx.JSON(http.StatusInternalServerError, "update failed")
+	accessLevel := GetAccessLevelJwt(ctx)
+	if accessLevel < 1 {
+		idUser := GetUUIDJwt(ctx)
+		fmt.Println("UUID -------------------------------->")
+		fmt.Println(idUser)
+		uuid := ctx.Param("uuid")
+		if v, error := sv.db.GetVote(uuid); error != nil {
+			ctx.JSON(http.StatusInternalServerError, "Vote unknown")
 			return
 		} else {
-			fmt.Println("vote", vote)
-			ctx.JSON(http.StatusOK, v)
+			v.UUIDVote = append(v.UUIDVote, idUser)
+			if vote, err := sv.db.UpdateVote(uuid, v); err != nil {
+				ctx.JSON(http.StatusInternalServerError, "update failed")
+				return
+			} else {
+				fmt.Println("vote", vote)
+				ctx.JSON(http.StatusOK, v)
+				return
+			}
+		}
+	} else {
+		var newVote model.Vote
+		if err := ctx.BindJSON(&newVote); err != nil {
+			ctx.JSON(http.StatusBadRequest, nil)
 			return
 		}
+		uuid := ctx.Param("uuid")
+		if v, error := sv.db.GetVote(uuid); error != nil {
+			ctx.JSON(http.StatusInternalServerError, "Vote unknown")
+			return
+		} else {
+			if newVote.Title != "" {
+				v.Title = newVote.Title
+			}
+
+			if newVote.Desc != "" {
+				v.Desc = newVote.Desc
+			}
+
+			if vote, err := sv.db.UpdateVote(uuid, v); err != nil {
+				ctx.JSON(http.StatusInternalServerError, "update failed")
+				return
+			} else {
+				fmt.Println("vote", vote)
+				ctx.JSON(http.StatusOK, v)
+				return
+			}
+		}
 	}
+
 }
 
 //GetAllVoteHandler is retriving all users from the database.
@@ -102,6 +117,11 @@ func (sv ServiceVote) GetAllVoteHandler(ctx *gin.Context) {
 
 // PostVoteHandler is creating a new vote into the database.
 func (sv ServiceVote) PostVoteHandler(ctx *gin.Context) {
+	accessLevel := GetAccessLevelJwt(ctx)
+	if accessLevel < 1 {
+		ctx.JSON(http.StatusForbidden, gin.H{"error": "Access level is too slow to access to this route."})
+		return
+	}
 	var v model.Vote
 	if err := ctx.BindJSON(&v); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
