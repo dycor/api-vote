@@ -98,6 +98,7 @@ func InitLogin(r *gin.Engine, port string, db db.Persist) {
 					LastName:    "Incomplet",
 					FirstName:   "Incomplet",
 					AccessLevel: u.AccessLevel,
+					UUID:        u.UUID,
 				}, nil
 			}
 
@@ -169,16 +170,17 @@ func InitLogin(r *gin.Engine, port string, db db.Persist) {
 
 		// Create UserGroupe protected Routes
 		usersRoute := auth.Group("/user")
-
-		votesRoute := auth.Group("/vote")
+		// Create VoteGroup protected Routes
+		votesRoutes := auth.Group("/vote")
 
 		// @path /auth/user/delete/:uuid
 		usersRoute.DELETE("/delete/:uuid", su.DeleteUserHandler)
 
 		// @path /auth/vote/post
-		votesRoute.POST("/post", sv.PostVoteHandler)
+		votesRoutes.POST("/post", sv.PostVoteHandler)
+
 		// @path /auth/vote/put/:uuid
-		votesRoute.PUT("/put/:uuid", sv.PutVoteHandler)
+		votesRoutes.PUT("/put/:uuid", sv.PutVoteHandler)
 	}
 
 	if err := http.ListenAndServe(":"+port, r); err != nil {
