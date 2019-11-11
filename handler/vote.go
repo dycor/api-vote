@@ -19,9 +19,7 @@ func InitVote(r *gin.Engine, db db.Persist) {
 	}
 	r.GET("/votes/:uuid", sv.GetVoteHandler)
 	r.DELETE("/votes/:uuid", sv.DeleteVoteHandler)
-	r.PUT("/votes/:uuid", sv.PutVoteHandler)
 	r.GET("/votes", sv.GetAllVoteHandler)
-	r.POST("/votes", sv.PostVoteHandler)
 }
 
 // ServiceVote is listing all methods on the CURD for REST operations.
