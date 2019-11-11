@@ -120,6 +120,11 @@ func (su ServiceUser) PostUserHandler(ctx *gin.Context) {
 }
 
 func (su ServiceUser) DeleteUserHandler(ctx *gin.Context) {
+	accessLevel := GetAccessLevelJwt(ctx)
+	if accessLevel < 1 {
+		ctx.JSON(http.StatusForbidden, gin.H{"error": "Access level is too slow to access to this route."})
+		return
+	}
 	u, err := su.db.GetUser(ctx.Param("uuid"))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -127,6 +132,7 @@ func (su ServiceUser) DeleteUserHandler(ctx *gin.Context) {
 	}
 	if err := su.db.DeleteUser(ctx.Param("uuid")); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{"message": "User " + u.FirstName + " with UUID " + ctx.Param("uuid") + " has been deleted"})
+	ctx.JSON(http.StatusOK, u)
 }

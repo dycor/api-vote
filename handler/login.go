@@ -173,3 +173,10 @@ func InitLogin(r *gin.Engine, port string, db db.Persist) {
 		log.Fatal(err)
 	}
 }
+
+func GetAccessLevelJwt(c *gin.Context) int {
+	claims := jwt.ExtractClaims(c)
+	accessLevel := claims[accessLevel].(float64)
+	var intAccessLevel int = int(accessLevel)
+	return intAccessLevel
+}
