@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/dycor/api-vote/db"
@@ -57,12 +58,35 @@ func (sv ServiceVote) PutVoteHandler(ctx *gin.Context) {
 		return
 	}
 	uuid := ctx.Param("uuid")
-	if err := sv.db.UpdateVote(uuid, newVote); err != nil {
+
+	/*if err := sv.db.UpdateVote(uuid, v); err != nil {
 		ctx.JSON(http.StatusInternalServerError, nil)
 		return
 	}
-	v, _ := sv.db.GetVote(uuid)
-	ctx.JSON(http.StatusOK, v)
+	vote, _ := sv.db.GetVote(uuid)
+	ctx.JSON(http.StatusOK, vote)
+	*/
+	if v, error := sv.db.GetVote(uuid); error != nil {
+		ctx.JSON(http.StatusInternalServerError, "Vote unknown")
+		return
+	} else {
+		if newVote.Title != "" {
+			v.Title = newVote.Title
+		}
+
+		if newVote.Desc != "" {
+			v.Desc = newVote.Desc
+		}
+
+		if vote, err := sv.db.UpdateVote(uuid, v); err != nil {
+			ctx.JSON(http.StatusInternalServerError, "update failed")
+			return
+		} else {
+			fmt.Println("vote", vote)
+			ctx.JSON(http.StatusOK, v)
+			return
+		}
+	}
 }
 
 //GetAllVoteHandler is retriving all users from the database.
