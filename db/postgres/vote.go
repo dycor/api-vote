@@ -18,9 +18,10 @@ func (sql PostgresDB) DeleteVote(uuid string, v model.Vote) error {
 }
 
 // UpdateVote is updating a vote from his/here uuid
-func (sql PostgresDB) UpdateVote(uuid string, v model.Vote) error {
-	sql.db.Where(&model.Vote{UUID: uuid}).Save(v)
-	return nil
+func (sql PostgresDB) UpdateVote(uuid string, v *model.Vote) (*model.Vote, error) {
+	var vote model.Vote
+	err := sql.db.Model(&vote).Where("uuid = ?", uuid).Updates(&v).Error
+	return &vote, err
 }
 
 // GetVote is getting a vote from his/here uuid.
