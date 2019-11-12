@@ -45,7 +45,7 @@ func (sv ServiceVote) DeleteVoteHandler(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, nil)
 		return
 	}
-	c.JSON(http.StatusOK, nil)
+	c.JSON(http.StatusNoContent, gin.H{"message": "Record was successfully deleted."})
 }
 
 ///PutVoteHandler is updating a vote from the given uuid param.

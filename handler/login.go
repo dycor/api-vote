@@ -176,7 +176,7 @@ func InitLogin(r *gin.Engine, port string, db db.Persist) {
 		votesRoutes := auth.Group("/votes")
 
 		// @path /user/delete/:uuid
-		usersRoute.DELETE("/delete/:uuid", su.DeleteUserHandler)
+		usersRoute.DELETE("/:uuid", su.DeleteUserHandler)
 
 		// @path /user/:uuid
 		usersRoute.PUT("/:uuid", su.PutUserHandler)
