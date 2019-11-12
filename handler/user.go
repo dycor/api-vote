@@ -49,7 +49,6 @@ func (su ServiceUser) PutUserHandler(ctx *gin.Context) {
 		return
 	}
 
-
 	var newUser model.User
 	if err := ctx.BindJSON(&newUser); err != nil {
 		ctx.JSON(http.StatusBadRequest, nil)
@@ -71,20 +70,20 @@ func (su ServiceUser) PutUserHandler(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, "User doesn't exist")
 		return
 	} else {
-		if newUser.FirstName != ""{
+		if newUser.FirstName != "" {
 			u.FirstName = newUser.FirstName
 		}
 
-		if newUser.LastName != ""{
+		if newUser.LastName != "" {
 			u.LastName = newUser.LastName
 		}
 
-		if newUser.Email != ""{
+		if newUser.Email != "" {
 			u.Email = newUser.Email
 		}
 
-		if newUser.Password != ""{
-			var errPwd  error
+		if newUser.Password != "" {
+			var errPwd error
 			u.Password, errPwd = HashPassword(newUser.Password)
 			if errPwd != nil {
 				ctx.JSON(http.StatusBadRequest, gin.H{"error": errPwd.Error()})
@@ -92,8 +91,7 @@ func (su ServiceUser) PutUserHandler(ctx *gin.Context) {
 			}
 		}
 
-
-		if  err := su.db.UpdateUser(uuid, u); err != nil {
+		if err := su.db.UpdateUser(uuid, u); err != nil {
 			ctx.JSON(http.StatusInternalServerError, "update failed")
 			return
 		} else {
@@ -152,7 +150,7 @@ func (su ServiceUser) DeleteUserHandler(ctx *gin.Context) {
 		ctx.JSON(http.StatusForbidden, gin.H{"error": "Access level is too slow to access to this route."})
 		return
 	}
-	u, err := su.db.GetUser(ctx.Param("uuid"))
+	_, err := su.db.GetUser(ctx.Param("uuid"))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -161,5 +159,5 @@ func (su ServiceUser) DeleteUserHandler(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	ctx.JSON(http.StatusOK, u)
+	ctx.JSON(http.StatusNoContent, gin.H{"message": "Record was successfully deleted."})
 }

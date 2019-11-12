@@ -19,7 +19,8 @@ func main() {
 		port = "8080"
 	}
 
-	handler.InitUser(r,postgres.New())
+	handler.InitUser(r, postgres.New())
+	handler.InitVote(r, postgres.New())
 	handler.InitLogin(r, port, postgres.New())
 	r.Run(":" + port)
 }
