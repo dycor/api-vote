@@ -18,7 +18,7 @@ require (
 	github.com/satori/go.uuid v1.2.0
 	github.com/ugorji/go v1.1.7 // indirect
 	golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550
-	golang.org/x/sys v0.0.0-20191020212454-3e7259c5e7c2 // indirect
+	golang.org/x/sys v0.1.0 // indirect
 	gopkg.in/go-playground/validator.v9 v9.30.0
 	gopkg.in/yaml.v2 v2.2.4 // indirect
 )
